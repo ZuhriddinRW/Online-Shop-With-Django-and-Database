@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .gradient-animate {
+            background-size: 200% 200%;
+            animation: gradient 8s ease infinite;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+<div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-20 left-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+    <div class="absolute top-40 right-10 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-2000"></div>
+    <div class="absolute -bottom-8 left-1/2 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-4000"></div>
+</div>
+
+<div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-8 bg-white rounded-2xl shadow-lg p-4">
+        <div class="flex items-center space-x-3">
+            <span class="text-3xl">👤</span>
+            <div>
+                <p class="text-sm text-gray-500">Logged in as</p>
+                <p class="font-bold text-gray-800">{{ user.username }}</p>
+                {% if user.is_superuser or user.is_staff %}
+                <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">Admin</span>
+                {% else %}
+                <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">User</span>
+                {% endif %}
+            </div>
+        </div>
+        <a href="{% url 'logout' %}"
+           class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
+            Logout 🚪
+        </a>
+    </div>
+
+    <div class="text-center mb-12">
+        <div class="inline-block float-animation">
+            <h1 class="text-5xl sm:text-6xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+                📦 Store Management
+            </h1>
+        </div>
+        <p class="text-gray-600 text-lg mt-4">Your complete business management solution</p>
+        <div class="w-24 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 mx-auto mt-4 rounded-full"></div>
+    </div>
+
+    {% if user.is_superuser or user.is_staff %}
+    <div class="mb-10">
+        <a href="{% url 'admin:index' %}" class="block">
+            <div class="bg-gradient-to-r from-red-500 to-pink-600 gradient-animate rounded-2xl shadow-2xl p-6 card-hover border border-red-300">
+                <div class="flex items-center justify-center space-x-4">
+                    <span class="text-5xl">👨‍💻</span>
+                    <div class="text-white">
+                        <h2 class="text-2xl font-bold">Django Admin Panel</h2>
+                        <p class="text-red-100 text-sm">Advanced system configuration</p>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-10">
+        <a href="{% url 'news' %}" class="block group">
+            <div class="bg-white rounded-2xl shadow-lg p-6 card-hover border-2 border-transparent hover:border-blue-400 h-full">
+                <div class="text-center">
+                    <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">📰</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">News</h3>
+                    <p class="text-gray-500 text-sm">Browse all news</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{% url 'categories' %}" class="block group">
+            <div class="bg-white rounded-2xl shadow-lg p-6 card-hover border-2 border-transparent hover:border-blue-400 h-full">
+                <div class="text-center">
+                    <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">📚</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Categories</h3>
+                    <p class="text-gray-500 text-sm">View all categories</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{% url 'products' %}" class="block group">
+            <div class="bg-white rounded-2xl shadow-lg p-6 card-hover border-2 border-transparent hover:border-blue-400 h-full">
+                <div class="text-center">
+                    <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">✅</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Products</h3>
+                    <p class="text-gray-500 text-sm">Manage inventory</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{% url 'suppliers' %}" class="block group">
+            <div class="bg-white rounded-2xl shadow-lg p-6 card-hover border-2 border-transparent hover:border-blue-400 h-full">
+                <div class="text-center">
+                    <div class="text-5xl mb-4 group-hover:scale-110 transition-transform">🔖</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Suppliers</h3>
+                    <p class="text-gray-500 text-sm">Supplier directory</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    {% if user.is_superuser or user.is_staff %}
+    <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-200">
+        <div class="flex items-center justify-center mb-8">
+            <div class="bg-gradient-to-r from-green-400 to-emerald-500 rounded-full p-3 mr-4">
+                <span class="text-3xl">➕</span>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-800">Quick Add</h2>
+        </div>
+
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <a href="{% url 'add_news' %}" class="block group">
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl shadow-md p-5 card-hover border-2 border-green-200 hover:border-green-400">
+                    <div class="text-center">
+                        <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">📝</div>
+                        <h4 class="font-bold text-gray-800 mb-1">Add News</h4>
+                        <p class="text-gray-600 text-xs">Create new article</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{% url 'add_category' %}" class="block group">
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl shadow-md p-5 card-hover border-2 border-green-200 hover:border-green-400">
+                    <div class="text-center">
+                        <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">🏷️</div>
+                        <h4 class="font-bold text-gray-800 mb-1">Add Category</h4>
+                        <p class="text-gray-600 text-xs">New classification</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{% url 'add_product' %}" class="block group">
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl shadow-md p-5 card-hover border-2 border-green-200 hover:border-green-400">
+                    <div class="text-center">
+                        <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">📦</div>
+                        <h4 class="font-bold text-gray-800 mb-1">Add Product</h4>
+                        <p class="text-gray-600 text-xs">Register new item</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{% url 'add_supplier' %}" class="block group">
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl shadow-md p-5 card-hover border-2 border-green-200 hover:border-green-400">
+                    <div class="text-center">
+                        <div class="text-4xl mb-3 group-hover:scale-110 transition-transform">🤝</div>
+                        <h4 class="font-bold text-gray-800 mb-1">Add Supplier</h4>
+                        <p class="text-gray-600 text-xs">New partnership</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="text-center mt-12 text-gray-500 text-sm">
+        <p>© 2025 Store Management System. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>

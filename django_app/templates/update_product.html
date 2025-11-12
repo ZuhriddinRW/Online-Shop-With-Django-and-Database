@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        .bg-particle {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.15;
+            animation: float 20s infinite;
+        }
+        .particle-1 { width: 300px; height: 300px; background: #fff; top: 10%; left: 5%; animation-delay: 0s; }
+        .particle-2 { width: 200px; height: 200px; background: #fff; top: 60%; right: 10%; animation-delay: 5s; }
+        .particle-3 { width: 250px; height: 250px; background: #fff; bottom: 10%; left: 40%; animation-delay: 10s; }
+
+        @keyframes float {
+            0%,100%{transform:translateY(0) rotate(0deg);}
+            33%{transform:translateY(-30px) rotate(120deg);}
+            66%{transform:translateY(30px) rotate(240deg);}
+        }
+
+        @keyframes slideUp { from{opacity:0;transform:translateY(40px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes fadeIn  { from{opacity:0;} to{opacity:1;} }
+
+        .card-animate { animation: slideUp 0.8s cubic-bezier(0.34,1.56,0.64,1); }
+
+        .info-card,.form-card{
+            background:#fff;
+            border-radius:24px;
+            box-shadow:0 20px 60px rgba(0,0,0,.2);
+            position:relative;
+            overflow:hidden;
+        }
+        .info-card::before,.form-card::before{
+            content:'';
+            position:absolute;
+            top:0;left:0;right:0;height:4px;
+            background:linear-gradient(90deg,#667eea,#764ba2,#667eea);
+            background-size:200% 100%;
+            animation:gradientMove 3s ease infinite;
+        }
+        @keyframes gradientMove{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+        .gradient-header{
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            position:relative;
+            overflow:hidden;
+        }
+        .gradient-header::after{
+            content:'';
+            position:absolute;
+            top:-50%;right:-50%;
+            width:200%;height:200%;
+            background:radial-gradient(circle,rgba(255,255,255,.1)0%,transparent 70%);
+            animation:rotate 15s linear infinite;
+        }
+        @keyframes rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+        .form-control,.form-select,textarea{
+            border:2px solid #e5e7eb;
+            border-radius:14px;
+            padding:.875rem 1.125rem;
+            transition:all .3s ease;
+            background:#fafafa;
+        }
+        .form-control:focus,.form-select:focus,textarea:focus{
+            border-color:#667eea;
+            box-shadow:0 0 0 5px rgba(102,126,234,.1);
+            background:#fff;
+            transform:translateY(-2px);
+        }
+        textarea{min-height:120px;}
+
+        .btn-save{
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            border:none;
+            border-radius:14px;
+            padding:.875rem 2.5rem;
+            font-weight:600;
+            transition:all .3s ease;
+            box-shadow:0 4px 15px rgba(102,126,234,.3);
+            position:relative;
+            overflow:hidden;
+        }
+        .btn-save::before{
+            content:'';
+            position:absolute;
+            top:0;left:-100%;
+            width:100%;height:100%;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
+            transition:left .5s;
+        }
+        .btn-save:hover::before{left:100%;}
+        .btn-save:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(102,126,234,.5);}
+
+        .btn-cancel{
+            border:2px solid #e5e7eb;
+            border-radius:14px;
+            padding:.875rem 2.5rem;
+            font-weight:600;
+            transition:all .3s ease;
+            background:#fff;
+        }
+        .btn-cancel:hover{
+            background:#f9fafb;
+            border-color:#667eea;
+            transform:translateY(-2px);
+            box-shadow:0 4px 12px rgba(0,0,0,.1);
+        }
+
+        .info-badge{
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color:#fff;
+            padding:.625rem 1.25rem;
+            border-radius:12px;
+            display:inline-flex;
+            align-items:center;
+            gap:.5rem;
+            box-shadow:0 4px 12px rgba(102,126,234,.3);
+            animation:fadeIn .5s ease;
+        }
+
+        .current-image-preview{
+            border:4px solid #f3f4f6;
+            border-radius:20px;
+            padding:.75rem;
+            transition:all .4s ease;
+            background:#fff;
+            display:inline-block;
+        }
+        .current-image-preview:hover{
+            border-color:#667eea;
+            box-shadow:0 8px 25px rgba(102,126,234,.3);
+            transform:scale(1.02);
+        }
+
+        .upload-zone{
+            border:3px dashed #d1d5db;
+            border-radius:20px;
+            padding:2rem;
+            background:linear-gradient(135deg,#fafafa 0%,#f3f4f6 100%);
+            transition:all .3s ease;
+            text-align:center;
+        }
+        .upload-zone:hover{
+            border-color:#667eea;
+            background:linear-gradient(135deg,#f0f4ff 0%,#e8ecff 100%);
+        }
+
+        .section-icon{
+            width:48px;height:48px;
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            border-radius:14px;
+            display:inline-flex;
+            align-items:center;justify-content:center;
+            box-shadow:0 4px 12px rgba(102,126,234,.3);
+        }
+
+        .description-box{
+            background:linear-gradient(135deg,#f9fafb 0%,#f3f4f6 100%);
+            border-radius:16px;
+            padding:1.25rem;
+            border:2px solid #e5e7eb;
+            position:relative;
+            overflow:hidden;
+        }
+        .description-box::before{
+            content:'';
+            position:absolute;
+            left:0;top:0;bottom:0;
+            width:4px;
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+        }
+
+        .label-text{
+            color:#374151;
+            font-weight:600;
+            display:flex;
+            align-items:center;
+            gap:.5rem;
+            margin-bottom:.75rem;
+        }
+        .helper-text{
+            color:#6b7280;
+            font-size:.875rem;
+            display:flex;
+            align-items:center;
+            gap:.375rem;
+            margin-top:.5rem;
+        }
+        .no-image-state{
+            background:linear-gradient(135deg,#f9fafb 0%,#f3f4f6 100%);
+            border-radius:20px;
+            padding:3rem;
+            border:3px dashed #d1d5db;
+            text-align:center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-particle particle-1"></div>
+<div class="bg-particle particle-2"></div>
+<div class="bg-particle particle-3"></div>
+
+<div class="container mx-auto px-4 py-8 position-relative">
+
+    <div class="info-card mb-6 p-4 card-animate">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-4">
+            <div class="d-flex align-items-center gap-3">
+                <div class="section-icon">
+                    <i class="bi bi-box-seam text-white" style="font-size:1.5rem;"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent m-0">
+                        Edit Product
+                    </h2>
+                    <p class="text-gray-500 text-sm mt-1 mb-0">Update name, price, category, description & image</p>
+                </div>
+            </div>
+            <a href="{% url 'products' %}"
+               class="px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl hover:border-purple-400 hover:bg-gray-50 transition shadow-md font-semibold no-underline inline-flex items-center gap-2">
+                <i class="bi bi-arrow-left"></i>
+                Back to Products
+            </a>
+        </div>
+    </div>
+
+    <div class="info-card mb-6 overflow-hidden card-animate" style="animation-delay:.15s;">
+        <div class="gradient-header text-white px-6 py-4 position-relative">
+            <div class="d-flex align-items-center gap-3 position-relative" style="z-index:1;">
+                <i class="bi bi-info-circle-fill" style="font-size:1.5rem;"></i>
+                <div>
+                    <strong class="text-xl">Current Product Information</strong>
+                    <p class="mb-0 opacity-75 small">Review before editing</p>
+                </div>
+            </div>
+        </div>
+        <div class="p-6">
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <p class="text-gray-500 text-sm font-semibold uppercase mb-2">
+                        <i class="bi bi-tag me-1"></i>Category
+                    </p>
+                    <div class="info-badge">
+                        <i class="bi bi-bookmark-fill"></i>
+                        <span>{{ product.category }}</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <p class="text-gray-500 text-sm font-semibold uppercase mb-2">
+                        <i class="bi bi-box-seam me-1"></i>Product Name
+                    </p>
+                    <div class="info-badge">
+                        <i class="bi bi-card-text"></i>
+                        <span>{{ product.product_name }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <p class="text-gray-500 text-sm font-semibold uppercase mb-2">
+                        <i class="bi bi-currency-dollar me-1"></i>Unit Price
+                    </p>
+                    <div class="info-badge">
+                        <i class="bi bi-cash-coin"></i>
+                        <span>${{ product.unit_price }}</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <p class="text-gray-500 text-sm font-semibold uppercase mb-2">
+                        <i class="bi bi-calendar-event me-1"></i>Created
+                    </p>
+                    <div class="info-badge">
+                        <i class="bi bi-clock-history"></i>
+                        <span>{{ product.created_at|date:"d M Y" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <p class="text-gray-500 text-sm font-semibold uppercase mb-3">
+                    <i class="bi bi-text-paragraph me-1"></i>Description
+                </p>
+                <div class="description-box">
+                    <p class="text-gray-700 mb-0 ms-3">
+                        {{ product.description|default:"No description provided" }}
+                    </p>
+                </div>
+            </div>
+
+            <div>
+                <p class="text-gray-500 text-sm font-semibold uppercase mb-3">
+                    <i class="bi bi-image me-1"></i>Current Image
+                </p>
+                {% if product.image %}
+                <div class="current-image-preview">
+                    <img src="{{ product.image.url }}" alt="Current image"
+                         class="rounded-xl shadow-lg" style="max-width:100%;max-height:350px;object-fit:cover;">
+                </div>
+                {% else %}
+                <div class="no-image-state">
+                    <i class="bi bi-image text-gray-400 d-block mb-3" style="font-size:4rem;"></i>
+                    <p class="text-gray-500 fw-semibold mb-1">No Image Uploaded</p>
+                    <p class="text-gray-400 small mb-0">Upload a new image in the form below</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="form-card overflow-hidden card-animate" style="animation-delay:.3s;">
+        <div class="gradient-header text-white px-6 py-4 position-relative">
+            <div class="d-flex align-items-center gap-3 position-relative" style="z-index:1;">
+                <i class="bi bi-pencil-fill" style="font-size:1.5rem;"></i>
+                <div>
+                    <strong class="text-xl">Update Product Details</strong>
+                    <p class="mb-0 opacity-75 small">Make changes and hit Save</p>
+                </div>
+            </div>
+        </div>
+        <div class="p-6">
+            <form method="POST" enctype="multipart/form-data" action="{% url 'update_product' product.pk %}">
+                {% csrf_token %}
+
+                <div class="mb-5">
+                    <label class="label-text">
+                        <i class="bi bi-box-seam text-purple-600"></i>
+                        <span>Product Name</span>
+                    </label>
+                    {{ form.product_name }}
+                    {% if form.product_name.errors %}
+                    <div class="alert alert-danger mt-2 py-2 px-3 border-0 rounded-3 shadow-sm">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        {% for error in form.product_name.errors %}{{ error }}{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-5">
+                    <label class="label-text">
+                        <i class="bi bi-tag text-purple-600"></i>
+                        <span>Category</span>
+                    </label>
+                    {{ form.category }}
+                    {% if form.category.errors %}
+                    <div class="alert alert-danger mt-2 py-2 px-3 border-0 rounded-3 shadow-sm">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        {% for error in form.category.errors %}{{ error }}{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-5">
+                    <label class="label-text">
+                        <i class="bi bi-currency-dollar text-purple-600"></i>
+                        <span>Unit Price</span>
+                    </label>
+                    {{ form.unit_price }}
+                    {% if form.unit_price.errors %}
+                    <div class="alert alert-danger mt-2 py-2 px-3 border-0 rounded-3 shadow-sm">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        {% for error in form.unit_price.errors %}{{ error }}{% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="helper-text">
+                        <i class="bi bi-lightbulb"></i>
+                        <span>Enter the price per unit (e.g., 19.99)</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-5">
+                    <label class="label-text">
+                        <i class="bi bi-text-paragraph text-purple-600"></i>
+                        <span>Description</span>
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                    <div class="alert alert-danger mt-2 py-2 px-3 border-0 rounded-3 shadow-sm">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        {% for error in form.description.errors %}{{ error }}{% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="helper-text">
+                        <i class="bi bi-lightbulb"></i>
+                        <span>Provide a detailed description (optional)</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-6">
+                    <label class="label-text">
+                        <i class="bi bi-image text-purple-600"></i>
+                        <span>Product Image</span>
+                    </label>
+                    <div class="upload-zone">
+                        {{ form.image }}
+                        <div class="mt-3">
+                            <i class="bi bi-cloud-arrow-up text-purple-500 d-block mb-2" style="font-size:2.5rem;"></i>
+                            <p class="text-gray-600 fw-semibold mb-1">Choose a new image</p>
+                            <p class="text-gray-500 small mb-0">JPG, PNG, GIF – max 5 MB</p>
+                        </div>
+                    </div>
+                    {% if form.image.errors %}
+                    <div class="alert alert-danger mt-2 py-2 px-3 border-0 rounded-3 shadow-sm">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        {% for error in form.image.errors %}{{ error }}{% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="helper-text">
+                        <i class="bi bi-info-circle"></i>
+                        <span>Leave empty to keep the current image.</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="d-flex gap-3 flex-wrap">
+                    <button type="submit" class="btn-save text-white position-relative">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <span class="position-relative">Save Changes</span>
+                    </button>
+                    <a href="{% url 'products' %}"
+                       class="btn-cancel text-gray-700 no-underline d-inline-flex align-items-center">
+                        <i class="bi bi-x-circle me-2"></i>
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="text-center mt-6" style="animation:fadeIn 1s ease;">
+        <p class="text-white fw-semibold shadow-sm d-inline-block px-4 py-2 rounded-pill"
+           style="background:rgba(255,255,255,.2);backdrop-filter:blur(10px);">
+            <i class="bi bi-shield-check me-2"></i>
+            All changes are saved securely
+        </p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

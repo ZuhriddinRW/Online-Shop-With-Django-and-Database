@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Supplier</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 2rem 0;
+        }
+        .form-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.6s ease-out;
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .form-control, .form-select {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
+        }
+        .btn-submit {
+            background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.875rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+        }
+        .btn-back {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        .btn-back:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        .icon-wrapper {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+        .label-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+        }
+        .section-divider {
+            border-top: 2px solid #f3f4f6;
+            margin: 2rem 0;
+            position: relative;
+        }
+        .section-divider::before {
+            content: attr(data-label);
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 0 1rem;
+            color: #f59e0b;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="form-card p-5">
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <a href="{% url 'home' %}" class="btn btn-back px-4 py-2">
+                        <i class="bi bi-arrow-left me-2"></i>Back
+                    </a>
+                    <div class="text-center flex-grow-1">
+                        <div class="icon-wrapper d-inline-flex mb-3">
+                            <i class="bi bi-building text-white" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <h3 class="fw-bold mb-1"
+                            style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                            Add New Supplier
+                        </h3>
+                        <p class="text-muted small mb-0">Register a new business partner</p>
+                    </div>
+                    <div style="width: 100px;"></div>
+                </div>
+
+                <form action="{% url 'add_supplier' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <h5 class="text-muted small fw-bold mb-3">
+                            <i class="bi bi-building me-2"></i>COMPANY INFORMATION
+                        </h5>
+
+                        <div class="mb-4">
+                            <label for="{{ form.company_name.id_for_label }}"
+                                   class="form-label fw-semibold d-flex align-items-center mb-3">
+                                <div class="label-icon">
+                                    <i class="bi bi-building text-white"></i>
+                                </div>
+                                <span>Company Name</span>
+                            </label>
+                            {{ form.company_name }}
+                            {% if form.company_name.errors %}
+                            <div class="alert alert-danger mt-2 py-2 px-3 border-0 rounded-3">
+                                <i class="bi bi-exclamation-circle me-2"></i>{{ form.company_name.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="section-divider" data-label="CONTACT DETAILS"></div>
+
+                    <div class="mb-4">
+                        <div class="mb-4">
+                            <label for="{{ form.contact_name.id_for_label }}"
+                                   class="form-label fw-semibold d-flex align-items-center mb-3">
+                                <div class="label-icon">
+                                    <i class="bi bi-person text-white"></i>
+                                </div>
+                                <span>Contact Person</span>
+                            </label>
+                            {{ form.contact_name }}
+                            {% if form.contact_name.errors %}
+                            <div class="alert alert-danger mt-2 py-2 px-3 border-0 rounded-3">
+                                <i class="bi bi-exclamation-circle me-2"></i>{{ form.contact_name.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.contact_title.id_for_label }}"
+                                   class="form-label fw-semibold d-flex align-items-center mb-3">
+                                <div class="label-icon">
+                                    <i class="bi bi-person-badge text-white"></i>
+                                </div>
+                                <span>Position / Title</span>
+                            </label>
+                            {{ form.contact_title }}
+                            {% if form.contact_title.errors %}
+                            <div class="alert alert-danger mt-2 py-2 px-3 border-0 rounded-3">
+                                <i class="bi bi-exclamation-circle me-2"></i>{{ form.contact_title.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="section-divider" data-label="LOCATION"></div>
+
+                    <div class="mb-5">
+                        <div class="mb-4">
+                            <label for="{{ form.address.id_for_label }}"
+                                   class="form-label fw-semibold d-flex align-items-center mb-3">
+                                <div class="label-icon">
+                                    <i class="bi bi-geo-alt text-white"></i>
+                                </div>
+                                <span>Street Address</span>
+                            </label>
+                            {{ form.address }}
+                            {% if form.address.errors %}
+                            <div class="alert alert-danger mt-2 py-2 px-3 border-0 rounded-3">
+                                <i class="bi bi-exclamation-circle me-2"></i>{{ form.address.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="{{ form.city.id_for_label }}"
+                                       class="form-label fw-semibold d-flex align-items-center mb-3">
+                                    <div class="label-icon">
+                                        <i class="bi bi-geo-alt-fill text-white"></i>
+                                    </div>
+                                    <span>City</span>
+                                </label>
+                                {{ form.city }}
+                                {% if form.city.errors %}
+                                <div class="alert alert-danger mt-2 py-2 px-3 border-0 rounded-3">
+                                    <i class="bi bi-exclamation-circle me-2"></i>{{ form.city.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label for="{{ form.region.id_for_label }}"
+                                       class="form-label fw-semibold d-flex align-items-center mb-3">
+                                    <div class="label-icon">
+                                        <i class="bi bi-map text-white"></i>
+                                    </div>
+                                    <span>Region / State</span>
+                                </label>
+                                {{ form.region }}
+                                {% if form.region.errors %}
+                                <div class="alert alert-danger mt-2 py-2 px-3 border-0 rounded-3">
+                                    <i class="bi bi-exclamation-circle me-2"></i>{{ form.region.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-submit btn-lg w-100 text-white mb-3">
+                        <i class="bi bi-check-circle me-2"></i>Add Supplier
+                    </button>
+
+                    <a href="{% url 'home' %}" class="btn btn-back w-100 py-2">
+                        <i class="bi bi-x-circle me-2"></i>Cancel
+                    </a>
+                </form>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Complete all required fields to register the supplier
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

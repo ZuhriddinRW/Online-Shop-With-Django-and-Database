@@ -1,0 +1,286 @@
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.views import View
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
+from .forms import *
+from .models import *
+
+
+def is_admin(user) :
+    return user.is_superuser or user.is_staff
+
+
+@login_required ( login_url='signin' )
+def index(request) :
+    return render ( request, 'index.html' )
+
+
+def SignInPage(request) :
+    return render ( request, 'SignIn.html' )
+
+
+@login_required ( login_url='signin' )
+def categories_with_id(request, category_id) :
+    categories = Category.objects.filter ( category_id=category_id )
+    return render ( request, 'categories.html', {'categories' : categories} )
+
+
+@login_required ( login_url='signin' )
+def products_by_category(request, category_id) :
+    products = Product.objects.filter ( category_id=category_id )
+    categories = Category.objects.all ()
+    return render ( request, 'products.html', {'products' : products, 'categories' : categories} )
+
+
+@login_required ( login_url='signin' )
+@user_passes_test ( is_admin, login_url='home' )
+def add_news(request) :
+    if request.method == 'POST' :
+        form = NewsForm ( request.POST, request.FILES )
+        if form.is_valid () :
+            news = News.objects.create ( **form.cleaned_data )
+            return redirect ( 'home' )
+    else :
+        form = NewsForm ()
+    return render ( request, 'add_news.html', {'form' : form} )
+
+
+@login_required ( login_url='signin' )
+@user_passes_test ( is_admin, login_url='home' )
+def add_category(request) :
+    if request.method == 'POST' :
+        form = CategoryForm ( request.POST, request.FILES )
+        if form.is_valid () :
+            category = Category.objects.create ( **form.cleaned_data )
+            return redirect ( 'home' )
+    else :
+        form = CategoryForm ()
+    return render ( request, 'add_category.html', {'form' : form} )
+
+
+@login_required ( login_url='signin' )
+@user_passes_test ( is_admin, login_url='home' )
+def add_product(request) :
+    if request.method == 'POST' :
+        form = ProductForm ( request.POST, request.FILES )
+        if form.is_valid () :
+            product = Product.objects.create ( **form.cleaned_data )
+            return redirect ( 'home' )
+    else :
+        form = ProductForm ()
+    return render ( request, 'add_product.html', {'form' : form} )
+
+
+@login_required ( login_url='signin' )
+@user_passes_test ( is_admin, login_url='home' )
+def add_supplier(request) :
+    if request.method == 'POST' :
+        form = SupplierForm ( request.POST, request.FILES )
+        if form.is_valid () :
+            supplier = Supplier.objects.create ( **form.cleaned_data )
+            return redirect ( 'home' )
+    else :
+        form = SupplierForm ()
+    return render ( request, 'add_supplier.html', {'form' : form} )
+
+
+class AdminRequiredMixin ( UserPassesTestMixin ) :
+    def test_func(self) :
+        return self.request.user.is_superuser or self.request.user.is_staff
+
+    def handle_no_permission(self) :
+        messages.error ( self.request, 'You do not have permission to perform this action.' )
+        return redirect ( 'home' )
+
+
+class HomeNews ( LoginRequiredMixin, ListView ) :
+    login_url = 'signin'
+    model = News
+    template_name = 'news.html'
+    context_object_name = 'news'
+
+
+class NewsUpdate ( LoginRequiredMixin, AdminRequiredMixin, UpdateView ) :
+    login_url = 'signin'
+    model = News
+    form_class = NewsForm
+    template_name = 'update_news.html'
+    success_url = reverse_lazy ( 'news' )
+    pk_url_kwargs = 'pk'
+
+    def form_valid(self, form) :
+        return super ().form_valid ( form )
+
+
+class NewsDelete ( LoginRequiredMixin, AdminRequiredMixin, DeleteView ) :
+    login_url = 'signin'
+    model = News
+    pk_url_kwargs = 'pk'
+    success_url = reverse_lazy ( 'news' )
+
+    def delete(self, request, *args, **kwargs) :
+        self.object = self.get_object ()
+        self.object.delete ()
+        return redirect ( self.success_url )
+
+
+class HomeCategories ( LoginRequiredMixin, ListView ) :
+    login_url = 'signin'
+    model = Category
+    template_name = 'categories.html'
+    context_object_name = 'categories'
+
+
+class CategoryUpdate ( LoginRequiredMixin, AdminRequiredMixin, UpdateView ) :
+    login_url = 'signin'
+    model = Category
+    form_class = CategoryForm
+    template_name = 'update_category.html'
+    success_url = reverse_lazy ( 'categories' )
+    pk_url_kwargs = 'pk'
+
+    def form_valid(self, form) :
+        return super ().form_valid ( form )
+
+
+class CategoryDelete ( LoginRequiredMixin, AdminRequiredMixin, DeleteView ) :
+    login_url = 'signin'
+    model = Category
+    pk_url_kwargs = 'pk'
+    success_url = reverse_lazy ( 'categories' )
+
+    def delete(self, request, *args, **kwargs) :
+        self.object = self.get_object ()
+        self.object.delete ()
+        return redirect ( self.success_url )
+
+
+class HomeProducts ( LoginRequiredMixin, ListView ) :
+    login_url = 'signin'
+    model = Product
+    categories = Category.objects.all ()
+    template_name = 'products.html'
+    context_object_name = 'products'
+    extra_context = {
+        'categories' : categories
+    }
+
+
+class ProductUpdate ( LoginRequiredMixin, AdminRequiredMixin, UpdateView ) :
+    login_url = 'signin'
+    model = Product
+    form_class = ProductForm
+    template_name = 'update_product.html'
+    success_url = reverse_lazy ( 'products' )
+    pk_url_kwargs = 'pk'
+
+    def form_valid(self, form) :
+        return super ().form_valid ( form )
+
+
+class ProductDelete ( LoginRequiredMixin, AdminRequiredMixin, DeleteView ) :
+    login_url = 'signin'
+    model = Product
+    pk_url_kwargs = 'pk'
+    success_url = reverse_lazy ( 'products' )
+
+    def delete(self, request, *args, **kwargs) :
+        self.object = self.get_object ()
+        self.object.delete ()
+        return redirect ( self.success_url )
+
+
+class HomeSuppliers ( LoginRequiredMixin, ListView ) :
+    login_url = 'signin'
+    model = Supplier
+    template_name = 'suppliers.html'
+    context_object_name = 'suppliers'
+
+
+class SupplierUpdate ( LoginRequiredMixin, AdminRequiredMixin, UpdateView ) :
+    login_url = 'signin'
+    model = Supplier
+    form_class = SupplierForm
+    template_name = 'update_supplier.html'
+    success_url = reverse_lazy ( 'suppliers' )
+    pk_url_kwargs = 'pk'
+
+    def form_valid(self, form) :
+        return super ().form_valid ( form )
+
+
+class SupplierDelete ( LoginRequiredMixin, AdminRequiredMixin, DeleteView ) :
+    login_url = 'signin'
+    model = Supplier
+    pk_url_kwargs = 'pk'
+    success_url = reverse_lazy ( 'suppliers' )
+
+    def delete(self, request, *args, **kwargs) :
+        self.object = self.get_object ()
+        self.object.delete ()
+        return redirect ( self.success_url )
+
+
+def SignIn(request) :
+    if request.user.is_authenticated :
+        return redirect ( 'home' )
+
+    if request.method == 'POST' :
+        username = request.POST.get ( 'username' )
+        password = request.POST.get ( 'password' )
+
+        user = authenticate ( request, username=username, password=password )
+
+        if user is not None :
+            login ( request, user )
+            messages.success ( request, 'Successfully logged in!' )
+            next_url = 'home'
+            return redirect ( next_url )
+        else :
+            messages.error ( request, 'Invalid username or password' )
+
+    return render ( request, 'SignIn.html' )
+
+
+def Logout(request) :
+    logout ( request )
+    messages.success ( request, 'Successfully logged out!' )
+    return redirect ( 'signin' )
+
+
+@login_required ( login_url='signin' )
+def cart_view(request) :
+    cart, _ = Cart.objects.get_or_create ( user=request.user )
+    return render ( request, 'Cart.html', {'cart' : cart} )
+
+
+@login_required ( login_url='signin' )
+def add_to_cart(request, product_id) :
+    if request.method != 'POST' :
+        return redirect ( 'products' )
+
+    product = get_object_or_404 ( Product, product_id=product_id )
+    cart, _ = Cart.objects.get_or_create ( user=request.user )
+
+    if CartItem.objects.filter ( cart=cart, product=product ).exists () :
+        CartItem.objects.filter ( cart=cart, product=product ).delete ()
+        messages.warning ( request, f"{product.product_name} has been removed from the cart." )
+    else :
+        CartItem.objects.create ( cart=cart, product=product )
+        messages.success ( request, f"{product.product_name} has been added to the cart!" )
+
+    return redirect ( 'products' )
+
+
+@login_required ( login_url='signin' )
+def remove_from_cart(request, item_id) :
+    item = get_object_or_404 ( CartItem, cart_item_id=item_id, cart__user=request.user )
+    product_name = item.product.product_name
+    item.delete ()
+    messages.success ( request, f"{product_name} has been removed from the cart" )
+    return redirect ( 'cart' )

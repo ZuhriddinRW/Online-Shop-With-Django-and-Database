@@ -265,13 +265,28 @@ def add_to_cart(request, product_id) :
         return redirect ( 'products' )
 
     product = get_object_or_404 ( Product, product_id=product_id )
+
+    if product.quantity <= 0 :
+        messages.error ( request, f"{product.product_name} is out of stock!" )
+        return redirect ( 'products' )
+
     cart, _ = Cart.objects.get_or_create ( user=request.user )
 
-    if CartItem.objects.filter ( cart=cart, product=product ).exists () :
-        CartItem.objects.filter ( cart=cart, product=product ).delete ()
-        messages.warning ( request, f"{product.product_name} has been removed from the cart." )
+    cart_item, created = CartItem.objects.get_or_create (
+        cart=cart,
+        product=product,
+        defaults={'quantity' : 1}
+    )
+
+    if not created :
+        if cart_item.quantity < product.quantity :
+            cart_item.quantity += 1
+            cart_item.save ()
+            messages.success ( request, f"{product.product_name} quantity increased in cart!" )
+        else :
+            messages.warning ( request,
+                               f"Cannot add more {product.product_name}. Only {product.quantity} available in stock." )
     else :
-        CartItem.objects.create ( cart=cart, product=product )
         messages.success ( request, f"{product.product_name} has been added to the cart!" )
 
     return redirect ( 'products' )
@@ -283,4 +298,44 @@ def remove_from_cart(request, item_id) :
     product_name = item.product.product_name
     item.delete ()
     messages.success ( request, f"{product_name} has been removed from the cart" )
+    return redirect ( 'cart' )
+
+
+@login_required ( login_url='signin' )
+def update_cart_quantity(request, cart_item_id) :
+    if request.method != 'POST' :
+        return redirect ( 'cart' )
+
+    cart_item = get_object_or_404 ( CartItem, cart_item_id=cart_item_id, cart__user=request.user )
+    action = request.POST.get ( 'action' )
+
+    if action == 'increase' :
+        if cart_item.quantity < cart_item.product.quantity :
+            cart_item.quantity += 1
+            cart_item.save ()
+            messages.success ( request, f"{cart_item.product.product_name} quantity increased!" )
+        else :
+            messages.warning ( request,
+                               f"Cannot add more {cart_item.product.product_name}. Only {cart_item.product.quantity} available in stock." )
+
+    elif action == 'decrease' :
+        if cart_item.quantity > 1 :
+            cart_item.quantity -= 1
+            cart_item.save ()
+            messages.success ( request, f"{cart_item.product.product_name} quantity decreased!" )
+        else :
+            product_name = cart_item.product.product_name
+            cart_item.delete ()
+            messages.info ( request, f"{product_name} has been removed from the cart" )
+
+    return redirect ( 'cart' )
+
+
+@login_required ( login_url='signin' )
+def clear_cart(request) :
+    if request.method == 'POST' :
+        cart = get_object_or_404 ( Cart, user=request.user )
+        items_count = cart.items.count ()
+        cart.items.all ().delete ()
+        messages.success ( request, f"{items_count} item(s) removed from cart" )
     return redirect ( 'cart' )

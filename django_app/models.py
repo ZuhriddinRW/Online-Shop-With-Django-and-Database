@@ -21,11 +21,15 @@ class Product ( models.Model ) :
     product_name = models.CharField ( max_length=50 )
     category = models.ForeignKey ( Category, on_delete=models.CASCADE )
     unit_price = models.IntegerField ()
+    quantity = models.IntegerField ( default=0, verbose_name='Stock Quantity' )
     description = models.TextField ( blank=True, null=True )
     image = models.ImageField ( upload_to='photo/%Y/%m/%d', blank=True, null=True, default='images/product.png' )
 
     def __str__(self) :
         return self.product_name
+
+    def is_in_stock(self) :
+        return self.quantity > 0
 
     class Meta :
         verbose_name = "Product"
@@ -66,39 +70,40 @@ class News ( models.Model ) :
         ordering = ['-created_at']
 
 
-class Cart(models.Model):
-    cart_id = models.AutoField(primary_key=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='cart')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+class Cart ( models.Model ) :
+    cart_id = models.AutoField ( primary_key=True )
+    user = models.OneToOneField ( User, on_delete=models.CASCADE, related_name='cart' )
+    created_at = models.DateTimeField ( auto_now_add=True )
+    updated_at = models.DateTimeField ( auto_now=True )
 
-    def __str__(self):
+    def __str__(self) :
         return f"Cart for {self.user.username}"
 
-    def get_total_price(self):
-        return sum(item.product.unit_price for item in self.items.all())
+    def get_total_price(self) :
+        return sum ( item.get_total_price () for item in self.items.all () )
 
-    def get_total_items(self):
-        return self.items.count()
+    def get_total_items(self) :
+        return sum ( item.quantity for item in self.items.all () )
 
-    class Meta:
+    class Meta :
         verbose_name = 'Cart'
         verbose_name_plural = 'Carts'
 
 
-class CartItem(models.Model):
-    cart_item_id = models.AutoField(primary_key=True)
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    added_at = models.DateTimeField(auto_now_add=True)
+class CartItem ( models.Model ) :
+    cart_item_id = models.AutoField ( primary_key=True )
+    cart = models.ForeignKey ( Cart, on_delete=models.CASCADE, related_name='items' )
+    product = models.ForeignKey ( Product, on_delete=models.CASCADE )
+    quantity = models.PositiveIntegerField ( default=1, verbose_name='Quantity' )
+    added_at = models.DateTimeField ( auto_now_add=True )
 
-    def __str__(self):
-        return f"{self.product.product_name}"
+    def __str__(self) :
+        return f"{self.product.product_name} (x{self.quantity})"
 
-    def get_total_price(self):
-        return self.product.unit_price
+    def get_total_price(self) :
+        return self.product.unit_price * self.quantity
 
-    class Meta:
+    class Meta :
         verbose_name = 'Cart Item'
         verbose_name_plural = 'Cart Items'
         unique_together = ['cart', 'product']

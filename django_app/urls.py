@@ -31,6 +31,8 @@ urlpatterns = [
     path ( 'logout/', Logout, name='logout' ),
 
     path ( 'cart/', cart_view, name='cart' ),
-    path ( 'add-to-cart/<int:product_id>/', add_to_cart, name='add_to_cart' ),
-    path ( 'remove-from-cart/<int:item_id>/', remove_from_cart, name='remove_from_cart' ),
+    path ( 'cart/add/<int:product_id>/', add_to_cart, name='add_to_cart' ),
+    path ( 'cart/remove/<int:item_id>/', remove_from_cart, name='remove_from_cart' ),
+    path ( 'cart/update/<int:cart_item_id>/', update_cart_quantity, name='update_cart_quantity' ),
+    path ( 'cart/clear/', clear_cart, name='clear_cart' ),
 ]

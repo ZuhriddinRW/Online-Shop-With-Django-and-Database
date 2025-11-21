@@ -83,6 +83,22 @@
     </div>
     {% endif %}
 
+    {% if user.is_superuser or user.is_staff %}
+    <div class="mb-10">
+        <a href="{% url 'schema-swagger-ui' %}" class="block">
+            <div class="bg-gradient-to-r from-green-500 to-green-600 gradient-animate rounded-2xl shadow-2xl p-6 card-hover border border-green-300">
+                <div class="flex items-center justify-center space-x-4">
+                    <span class="text-5xl">📗</span>
+                    <div class="text-white">
+                        <h2 class="text-2xl font-bold">Swagger</h2>
+                        <p class="text-red-100 text-sm">Advanced API configuration</p>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    {% endif %}
+
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-10">
         <a href="{% url 'news' %}" class="block group">
             <div class="bg-white rounded-2xl shadow-lg p-6 card-hover border-2 border-transparent hover:border-blue-400 h-full">

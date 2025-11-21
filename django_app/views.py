@@ -6,6 +6,12 @@ from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django_app.serializers import *
+from django_app.models import *
 
 from .forms import *
 from .models import *
@@ -15,7 +21,7 @@ def is_admin(user) :
     return user.is_superuser or user.is_staff
 
 
-@login_required ( login_url='signin' )
+@login_required ( login_url='SignIn' )
 def index(request) :
     return render ( request, 'index.html' )
 
@@ -24,20 +30,20 @@ def SignInPage(request) :
     return render ( request, 'SignIn.html' )
 
 
-@login_required ( login_url='signin' )
+@login_required ( login_url='SignIn' )
 def categories_with_id(request, category_id) :
     categories = Category.objects.filter ( category_id=category_id )
     return render ( request, 'categories.html', {'categories' : categories} )
 
 
-@login_required ( login_url='signin' )
+@login_required ( login_url='SignIn' )
 def products_by_category(request, category_id) :
     products = Product.objects.filter ( category_id=category_id )
     categories = Category.objects.all ()
     return render ( request, 'products.html', {'products' : products, 'categories' : categories} )
 
 
-@login_required ( login_url='signin' )
+@login_required ( login_url='SignIn' )
 @user_passes_test ( is_admin, login_url='home' )
 def add_news(request) :
     if request.method == 'POST' :
@@ -50,7 +56,7 @@ def add_news(request) :
     return render ( request, 'add_news.html', {'form' : form} )
 
 
-@login_required ( login_url='signin' )
+@login_required ( login_url='SignIn' )
 @user_passes_test ( is_admin, login_url='home' )
 def add_category(request) :
     if request.method == 'POST' :
@@ -63,7 +69,7 @@ def add_category(request) :
     return render ( request, 'add_category.html', {'form' : form} )
 
 
-@login_required ( login_url='signin' )
+@login_required ( login_url='SignIn' )
 @user_passes_test ( is_admin, login_url='home' )
 def add_product(request) :
     if request.method == 'POST' :
@@ -76,7 +82,7 @@ def add_product(request) :
     return render ( request, 'add_product.html', {'form' : form} )
 
 
-@login_required ( login_url='signin' )
+@login_required ( login_url='SignIn' )
 @user_passes_test ( is_admin, login_url='home' )
 def add_supplier(request) :
     if request.method == 'POST' :
@@ -99,14 +105,14 @@ class AdminRequiredMixin ( UserPassesTestMixin ) :
 
 
 class HomeNews ( LoginRequiredMixin, ListView ) :
-    login_url = 'signin'
+    login_url = 'SignIn'
     model = News
     template_name = 'news.html'
     context_object_name = 'news'
 
 
 class NewsUpdate ( LoginRequiredMixin, AdminRequiredMixin, UpdateView ) :
-    login_url = 'signin'
+    login_url = 'SignIn'
     model = News
     form_class = NewsForm
     template_name = 'update_news.html'
@@ -118,7 +124,7 @@ class NewsUpdate ( LoginRequiredMixin, AdminRequiredMixin, UpdateView ) :
 
 
 class NewsDelete ( LoginRequiredMixin, AdminRequiredMixin, DeleteView ) :
-    login_url = 'signin'
+    login_url = 'SignIn'
     model = News
     pk_url_kwargs = 'pk'
     success_url = reverse_lazy ( 'news' )
@@ -130,14 +136,14 @@ class NewsDelete ( LoginRequiredMixin, AdminRequiredMixin, DeleteView ) :
 
 
 class HomeCategories ( LoginRequiredMixin, ListView ) :
-    login_url = 'signin'
+    login_url = 'SignIn'
     model = Category
     template_name = 'categories.html'
     context_object_name = 'categories'
 
 
 class CategoryUpdate ( LoginRequiredMixin, AdminRequiredMixin, UpdateView ) :
-    login_url = 'signin'
+    login_url = 'SignIn'
     model = Category
     form_class = CategoryForm
     template_name = 'update_category.html'
@@ -149,7 +155,7 @@ class CategoryUpdate ( LoginRequiredMixin, AdminRequiredMixin, UpdateView ) :
 
 
 class CategoryDelete ( LoginRequiredMixin, AdminRequiredMixin, DeleteView ) :
-    login_url = 'signin'
+    login_url = 'SignIn'
     model = Category
     pk_url_kwargs = 'pk'
     success_url = reverse_lazy ( 'categories' )
@@ -161,7 +167,7 @@ class CategoryDelete ( LoginRequiredMixin, AdminRequiredMixin, DeleteView ) :
 
 
 class HomeProducts ( LoginRequiredMixin, ListView ) :
-    login_url = 'signin'
+    login_url = 'SignIn'
     model = Product
     categories = Category.objects.all ()
     template_name = 'products.html'
@@ -172,7 +178,7 @@ class HomeProducts ( LoginRequiredMixin, ListView ) :
 
 
 class ProductUpdate ( LoginRequiredMixin, AdminRequiredMixin, UpdateView ) :
-    login_url = 'signin'
+    login_url = 'SignIn'
     model = Product
     form_class = ProductForm
     template_name = 'update_product.html'
@@ -184,7 +190,7 @@ class ProductUpdate ( LoginRequiredMixin, AdminRequiredMixin, UpdateView ) :
 
 
 class ProductDelete ( LoginRequiredMixin, AdminRequiredMixin, DeleteView ) :
-    login_url = 'signin'
+    login_url = 'SignIn'
     model = Product
     pk_url_kwargs = 'pk'
     success_url = reverse_lazy ( 'products' )
@@ -196,14 +202,14 @@ class ProductDelete ( LoginRequiredMixin, AdminRequiredMixin, DeleteView ) :
 
 
 class HomeSuppliers ( LoginRequiredMixin, ListView ) :
-    login_url = 'signin'
+    login_url = 'SignIn'
     model = Supplier
     template_name = 'suppliers.html'
     context_object_name = 'suppliers'
 
 
 class SupplierUpdate ( LoginRequiredMixin, AdminRequiredMixin, UpdateView ) :
-    login_url = 'signin'
+    login_url = 'SignIn'
     model = Supplier
     form_class = SupplierForm
     template_name = 'update_supplier.html'
@@ -215,7 +221,7 @@ class SupplierUpdate ( LoginRequiredMixin, AdminRequiredMixin, UpdateView ) :
 
 
 class SupplierDelete ( LoginRequiredMixin, AdminRequiredMixin, DeleteView ) :
-    login_url = 'signin'
+    login_url = 'SignIn'
     model = Supplier
     pk_url_kwargs = 'pk'
     success_url = reverse_lazy ( 'suppliers' )
@@ -250,16 +256,16 @@ def SignIn(request) :
 def Logout(request) :
     logout ( request )
     messages.success ( request, 'Successfully logged out!' )
-    return redirect ( 'signin' )
+    return redirect ( 'SignIn' )
 
 
-@login_required ( login_url='signin' )
+@login_required ( login_url='SignIn' )
 def cart_view(request) :
     cart, _ = Cart.objects.get_or_create ( user=request.user )
     return render ( request, 'Cart.html', {'cart' : cart} )
 
 
-@login_required ( login_url='signin' )
+@login_required ( login_url='SignIn' )
 def add_to_cart(request, product_id) :
     if request.method != 'POST' :
         return redirect ( 'products' )
@@ -292,7 +298,7 @@ def add_to_cart(request, product_id) :
     return redirect ( 'products' )
 
 
-@login_required ( login_url='signin' )
+@login_required ( login_url='SignIn' )
 def remove_from_cart(request, item_id) :
     item = get_object_or_404 ( CartItem, cart_item_id=item_id, cart__user=request.user )
     product_name = item.product.product_name
@@ -301,7 +307,7 @@ def remove_from_cart(request, item_id) :
     return redirect ( 'cart' )
 
 
-@login_required ( login_url='signin' )
+@login_required ( login_url='SignIn' )
 def update_cart_quantity(request, cart_item_id) :
     if request.method != 'POST' :
         return redirect ( 'cart' )
@@ -331,7 +337,7 @@ def update_cart_quantity(request, cart_item_id) :
     return redirect ( 'cart' )
 
 
-@login_required ( login_url='signin' )
+@login_required ( login_url='SignIn' )
 def clear_cart(request) :
     if request.method == 'POST' :
         cart = get_object_or_404 ( Cart, user=request.user )
@@ -339,3 +345,103 @@ def clear_cart(request) :
         cart.items.all ().delete ()
         messages.success ( request, f"{items_count} item(s) removed from cart" )
     return redirect ( 'cart' )
+
+
+@swagger_auto_schema (
+    method='get',
+    responses={200 : CategorySerializer ( many=True )}
+)
+@swagger_auto_schema (
+    method='post',
+    request_body=CategorySerializer,
+    responses={201 : CategorySerializer ()}
+)
+@api_view ( ['GET', 'POST'] )
+def category_list_create(request) :
+    if request.method == 'GET' :
+        categories = Category.objects.all ()
+        serializer = CategorySerializer ( categories, many=True )
+        return Response ( data=serializer.data, status=status.HTTP_200_OK )
+
+    elif request.method == 'POST' :
+        serializer = CategorySerializer ( data=request.data )
+        if serializer.is_valid ( raise_exception=True ) :
+            serializer.save ()
+            return Response ( data=serializer.data, status=status.HTTP_201_CREATED )
+        return Response ( serializer.errors, status=status.HTTP_400_BAD_REQUEST )
+    return None
+
+
+@swagger_auto_schema (
+    method='get',
+    responses={200 : ProductSerializer ( many=True )}
+)
+@swagger_auto_schema (
+    method='post',
+    request_body=ProductSerializer,
+    responses={201 : ProductSerializer ()}
+)
+@api_view ( ['GET', 'POST'] )
+def product_list_create(request) :
+    if request.method == 'GET' :
+        products = Product.objects.all ()
+        serializer = ProductSerializer ( products, many=True )
+        return Response ( data=serializer.data, status=status.HTTP_200_OK )
+
+    elif request.method == 'POST' :
+        serializer = ProductSerializer ( data=request.data )
+        if serializer.is_valid ( raise_exception=True ) :
+            serializer.save ()
+            return Response ( data=serializer.data, status=status.HTTP_201_CREATED )
+        return Response ( serializer.errors, status=status.HTTP_400_BAD_REQUEST )
+    return None
+
+
+@swagger_auto_schema (
+    method='get',
+    responses={200 : SupplierSerializer ( many=True )}
+)
+@swagger_auto_schema (
+    method='post',
+    request_body=SupplierSerializer,
+    responses={201 : SupplierSerializer ()}
+)
+@api_view ( ['GET', 'POST'] )
+def supplier_list_create(request) :
+    if request.method == 'GET' :
+        suppliers = Supplier.objects.all ()
+        serializer = SupplierSerializer ( suppliers, many=True )
+        return Response ( data=serializer.data, status=status.HTTP_200_OK )
+
+    elif request.method == 'POST' :
+        serializer = SupplierSerializer ( data=request.data )
+        if serializer.is_valid ( raise_exception=True ) :
+            serializer.save ()
+            return Response ( data=serializer.data, status=status.HTTP_201_CREATED )
+        return Response ( serializer.errors, status=status.HTTP_400_BAD_REQUEST )
+    return None
+
+
+@swagger_auto_schema (
+    method='get',
+    responses={200 : NewsSerializer ( many=True )}
+)
+@swagger_auto_schema (
+    method='post',
+    request_body=NewsSerializer,
+    responses={201 : NewsSerializer ()}
+)
+@api_view ( ['GET', 'POST'] )
+def news_list_create(request) :
+    if request.method == 'GET' :
+        news = News.objects.all ()
+        serializer = NewsSerializer ( news, many=True )
+        return Response ( data=serializer.data, status=status.HTTP_200_OK )
+
+    elif request.method == 'POST' :
+        serializer = NewsSerializer ( data=request.data )
+        if serializer.is_valid ( raise_exception=True ) :
+            serializer.save ()
+            return Response ( data=serializer.data, status=status.HTTP_201_CREATED )
+        return Response ( serializer.errors, status=status.HTTP_400_BAD_REQUEST )
+    return None

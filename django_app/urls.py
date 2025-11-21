@@ -1,5 +1,21 @@
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 from django.urls import path
-from .views import *
+from django_app.views import *
+
+schema_view = get_schema_view (
+    openapi.Info (
+        title="Snippets API",
+        default_version='v1',
+        description="Test description",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact ( email="contact@snippets.local" ),
+        license=openapi.License ( name="BSD License" ),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 
 urlpatterns = [
     path ( '', index, name='home' ),
@@ -27,7 +43,7 @@ urlpatterns = [
     path ( 'categories/<int:category_id>/', categories_with_id, name='categories_by_id' ),
     path ( 'products/<int:category_id>/', products_by_category, name='products_by_category' ),
 
-    path ( 'signin/', SignIn, name='signin' ),
+    path ( 'signin/', SignIn, name='SignIn' ),
     path ( 'logout/', Logout, name='logout' ),
 
     path ( 'cart/', cart_view, name='cart' ),
@@ -35,4 +51,13 @@ urlpatterns = [
     path ( 'cart/remove/<int:item_id>/', remove_from_cart, name='remove_from_cart' ),
     path ( 'cart/update/<int:cart_item_id>/', update_cart_quantity, name='update_cart_quantity' ),
     path ( 'cart/clear/', clear_cart, name='clear_cart' ),
+
+    path ( 'api/categories/', category_list_create, name='category-list-create' ),
+    path ( 'api/products/', product_list_create, name='product-list-create' ),
+    path ( 'api/suppliers/', supplier_list_create, name='supplier-list-create' ),
+    path ( 'api/news/', news_list_create, name='news-list-create' ),
+
+    path ( 'swagger<format>/', schema_view.without_ui ( cache_timeout=0 ), name='schema-json' ),
+    path ( 'swagger/', schema_view.with_ui ( 'swagger', cache_timeout=0 ), name='schema-swagger-ui' ),
+    path ( 'redoc/', schema_view.with_ui ( 'redoc', cache_timeout=0 ), name='schema-redoc' ),
 ]

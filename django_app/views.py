@@ -375,13 +375,11 @@ class NewsModelViewSet ( ModelViewSet ) :
 
 
 class CommentModelViewSet ( ModelViewSet ) :
-    queryset = Comment.objects.filter ( is_active=True )
-    permission_classes = [IsAuthenticated]
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]  # Login shart
 
-    def get_serializer_class(self) :
-        if self.action in ['create', 'update', 'partial_update'] :
-            return CommentSerializer
-        return CommentSerializer
+    def get_queryset(self) :
+        return Comment.objects.filter ( author=self.request.user, is_active=True )
 
     def perform_create(self, serializer) :
         serializer.save ( author=self.request.user )

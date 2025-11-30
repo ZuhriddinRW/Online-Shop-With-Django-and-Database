@@ -1,8 +1,10 @@
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from django.urls import path
+from django.urls import path, include
 from django_app.views import *
+from rest_framework.routers import DefaultRouter
+from rest_framework.authtoken.views import obtain_auth_token
 
 schema_view = get_schema_view (
     openapi.Info (
@@ -17,8 +19,16 @@ schema_view = get_schema_view (
     permission_classes=(permissions.AllowAny,),
 )
 
+router = DefaultRouter ()
+router.register ( r'news', NewsModelViewSet, basename='news' )
+router.register ( r'categories', CategoryModelViewSet, basename='category' )
+router.register ( r'products', ProductModelViewSet, basename='product' )
+router.register ( r'suppliers', SupplierModelViewSet, basename='supplier' )
+router.register ( r'comments', CommentModelViewSet, basename='comment' )
+
 urlpatterns = [
-    path ( '', index, name='home' ),
+    path ( 'home/', index, name='home' ),
+    path ( '', include ( router.urls ) ),
 
     path ( 'news', HomeNews.as_view (), name='news' ),
     path ( 'add_news/', add_news, name="add_news" ),
@@ -52,12 +62,9 @@ urlpatterns = [
     path ( 'cart/update/<int:cart_item_id>/', update_cart_quantity, name='update_cart_quantity' ),
     path ( 'cart/clear/', clear_cart, name='clear_cart' ),
 
-    path ( 'api/categories/', category_list_create, name='category-list-create' ),
-    path ( 'api/products/', product_list_create, name='product-list-create' ),
-    path ( 'api/suppliers/', supplier_list_create, name='supplier-list-create' ),
-    path ( 'api/news/', news_list_create, name='news-list-create' ),
-
     path ( 'swagger<format>/', schema_view.without_ui ( cache_timeout=0 ), name='schema-json' ),
     path ( 'swagger/', schema_view.with_ui ( 'swagger', cache_timeout=0 ), name='schema-swagger-ui' ),
     path ( 'redoc/', schema_view.with_ui ( 'redoc', cache_timeout=0 ), name='schema-redoc' ),
+
+    path ( 'api-token-auth/', obtain_auth_token )
 ]

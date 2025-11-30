@@ -19,8 +19,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_app',
     'rest_framework',
-    'drf_yasg'
+    'drf_yasg',
+    'rest_framework.authtoken'
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES' : [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -1,7 +1,9 @@
+from http.client import ResponseNotReady
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.template.context_processors import request
 from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
@@ -9,7 +11,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet
+
 from django_app.serializers import *
 from django_app.models import *
 
@@ -347,101 +353,35 @@ def clear_cart(request) :
     return redirect ( 'cart' )
 
 
-@swagger_auto_schema (
-    method='get',
-    responses={200 : CategorySerializer ( many=True )}
-)
-@swagger_auto_schema (
-    method='post',
-    request_body=CategorySerializer,
-    responses={201 : CategorySerializer ()}
-)
-@api_view ( ['GET', 'POST'] )
-def category_list_create(request) :
-    if request.method == 'GET' :
-        categories = Category.objects.all ()
-        serializer = CategorySerializer ( categories, many=True )
-        return Response ( data=serializer.data, status=status.HTTP_200_OK )
-
-    elif request.method == 'POST' :
-        serializer = CategorySerializer ( data=request.data )
-        if serializer.is_valid ( raise_exception=True ) :
-            serializer.save ()
-            return Response ( data=serializer.data, status=status.HTTP_201_CREATED )
-        return Response ( serializer.errors, status=status.HTTP_400_BAD_REQUEST )
-    return None
+class CategoryModelViewSet ( ModelViewSet ) :
+    queryset = Category.objects.all ()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated]
 
 
-@swagger_auto_schema (
-    method='get',
-    responses={200 : ProductSerializer ( many=True )}
-)
-@swagger_auto_schema (
-    method='post',
-    request_body=ProductSerializer,
-    responses={201 : ProductSerializer ()}
-)
-@api_view ( ['GET', 'POST'] )
-def product_list_create(request) :
-    if request.method == 'GET' :
-        products = Product.objects.all ()
-        serializer = ProductSerializer ( products, many=True )
-        return Response ( data=serializer.data, status=status.HTTP_200_OK )
-
-    elif request.method == 'POST' :
-        serializer = ProductSerializer ( data=request.data )
-        if serializer.is_valid ( raise_exception=True ) :
-            serializer.save ()
-            return Response ( data=serializer.data, status=status.HTTP_201_CREATED )
-        return Response ( serializer.errors, status=status.HTTP_400_BAD_REQUEST )
-    return None
+class ProductModelViewSet ( ModelViewSet ) :
+    queryset = Product.objects.all ()
+    serializer_class = ProductSerializer
 
 
-@swagger_auto_schema (
-    method='get',
-    responses={200 : SupplierSerializer ( many=True )}
-)
-@swagger_auto_schema (
-    method='post',
-    request_body=SupplierSerializer,
-    responses={201 : SupplierSerializer ()}
-)
-@api_view ( ['GET', 'POST'] )
-def supplier_list_create(request) :
-    if request.method == 'GET' :
-        suppliers = Supplier.objects.all ()
-        serializer = SupplierSerializer ( suppliers, many=True )
-        return Response ( data=serializer.data, status=status.HTTP_200_OK )
-
-    elif request.method == 'POST' :
-        serializer = SupplierSerializer ( data=request.data )
-        if serializer.is_valid ( raise_exception=True ) :
-            serializer.save ()
-            return Response ( data=serializer.data, status=status.HTTP_201_CREATED )
-        return Response ( serializer.errors, status=status.HTTP_400_BAD_REQUEST )
-    return None
+class SupplierModelViewSet ( ModelViewSet ) :
+    queryset = Supplier.objects.all ()
+    serializer_class = SupplierSerializer
 
 
-@swagger_auto_schema (
-    method='get',
-    responses={200 : NewsSerializer ( many=True )}
-)
-@swagger_auto_schema (
-    method='post',
-    request_body=NewsSerializer,
-    responses={201 : NewsSerializer ()}
-)
-@api_view ( ['GET', 'POST'] )
-def news_list_create(request) :
-    if request.method == 'GET' :
-        news = News.objects.all ()
-        serializer = NewsSerializer ( news, many=True )
-        return Response ( data=serializer.data, status=status.HTTP_200_OK )
+class NewsModelViewSet ( ModelViewSet ) :
+    queryset = News.objects.all ()
+    serializer_class = NewsSerializer
 
-    elif request.method == 'POST' :
-        serializer = NewsSerializer ( data=request.data )
-        if serializer.is_valid ( raise_exception=True ) :
-            serializer.save ()
-            return Response ( data=serializer.data, status=status.HTTP_201_CREATED )
-        return Response ( serializer.errors, status=status.HTTP_400_BAD_REQUEST )
-    return None
+
+class CommentModelViewSet ( ModelViewSet ) :
+    queryset = Comment.objects.filter ( is_active=True )
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self) :
+        if self.action in ['create', 'update', 'partial_update'] :
+            return CommentSerializer
+        return CommentSerializer
+
+    def perform_create(self, serializer) :
+        serializer.save ( author=self.request.user )

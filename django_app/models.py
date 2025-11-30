@@ -70,6 +70,29 @@ class News ( models.Model ) :
         ordering = ['-created_at']
 
 
+class Comment ( models.Model ) :
+    comment_id = models.AutoField ( primary_key=True )
+    text = models.TextField ( verbose_name='Comment Text' )
+    author = models.ForeignKey ( User, on_delete=models.CASCADE, related_name='comments' )
+    category = models.ForeignKey ( Category, on_delete=models.CASCADE, related_name='comments', blank=True, null=True )
+    news = models.ForeignKey ( News, on_delete=models.CASCADE, related_name='comments', blank=True, null=True )
+    created_at = models.DateTimeField ( auto_now_add=True, verbose_name='Created At' )
+    updated_at = models.DateTimeField ( auto_now=True, verbose_name='Updated At' )
+    is_active = models.BooleanField ( default=True, verbose_name='Is Active' )
+
+    def __str__(self) :
+        if self.category :
+            return f"Comment by {self.author.username} on {self.category.category_name}"
+        elif self.news :
+            return f"Comment by {self.author.username} on {self.news.title}"
+        return f"Comment by {self.author.username}"
+
+    class Meta :
+        verbose_name = 'Comment'
+        verbose_name_plural = 'Comments'
+        ordering = ['-created_at']
+
+
 class Cart ( models.Model ) :
     cart_id = models.AutoField ( primary_key=True )
     user = models.OneToOneField ( User, on_delete=models.CASCADE, related_name='cart' )

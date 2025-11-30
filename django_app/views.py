@@ -376,7 +376,7 @@ class NewsModelViewSet ( ModelViewSet ) :
 
 class CommentModelViewSet ( ModelViewSet ) :
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticated]  # Login shart
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self) :
         return Comment.objects.filter ( author=self.request.user, is_active=True )
